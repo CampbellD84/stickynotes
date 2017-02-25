@@ -19764,18 +19764,59 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
 
 var AppActions = {
-
+  addNote: function(note){
+    AppDispatcher.handleViewAction({
+      actionType: AppConstants.ADD_NOTE,
+      note: note
+    });
+  }
 }
-
 module.exports = AppActions;
-},{"../constants/AppConstants":166,"../dispatcher/AppDispatcher":167}],165:[function(require,module,exports){
+},{"../constants/AppConstants":167,"../dispatcher/AppDispatcher":168}],165:[function(require,module,exports){
 var React = require('react');
 var AppActions = require('../actions/AppActions');
 var AppStore = require('../stores/AppStore');
 
+
+var AddNoteForm = React.createClass({displayName: "AddNoteForm",
+  render: function(){
+    return(
+      React.createElement("div", null, 
+        React.createElement("h5", null, "Add a Note"), 
+        React.createElement("form", {onSubmit: this.onSubmit}, 
+          React.createElement("div", {className: "row"}, 
+            React.createElement("div", {className: "large-12 columns"}, 
+              React.createElement("label", null, 
+                "Note Text", 
+                React.createElement("input", {type: "text", ref: "text", placeholder: "Enter Text..."})
+              ), 
+              React.createElement("button", {className: "button"}, "Add")
+            )
+          )
+        )
+      )
+    )
+  },
+
+  onSubmit: function(e) {
+    e.preventDefault();
+    var note = {
+      text: this.refs.text.value.trim()
+    }
+    AppActions.addNote(note);
+  }
+});
+
+module.exports = AddNoteForm;
+},{"../actions/AppActions":164,"../stores/AppStore":170,"react":163}],166:[function(require,module,exports){
+var React = require('react');
+var AppActions = require('../actions/AppActions');
+var AppStore = require('../stores/AppStore');
+var AddNoteForm = require('./AddNoteForm.js');
+
 function getAppState() {
   return {
-    contacts: AppStore.getContacts()
+    notes: AppStore.getNotes()
   }
 }
 
@@ -19790,6 +19831,7 @@ var App = React.createClass({displayName: "App",
     AppStore.removeChangeListener(this._onChange);
   },
   render: function(){
+    console.log(this.state.notes);
     return(
       React.createElement("div", null, 
         React.createElement("div", {className: "off-canvas-wrapper"}, 
@@ -19797,7 +19839,7 @@ var App = React.createClass({displayName: "App",
             React.createElement("div", {className: "off-canvas position-left reveal-for-large", "data-off-canvas": true, "data-position": "left"}, 
               React.createElement("div", {className: "row column"}, 
                 React.createElement("br", null), 
-                "//ADD NOTE FORM"
+                React.createElement(AddNoteForm, null)
               )
             ), 
             React.createElement("div", {className: "off-canvas-content", "data-off-canvas-content": true}, 
@@ -19814,11 +19856,11 @@ var App = React.createClass({displayName: "App",
 });
 
 module.exports = App;
-},{"../actions/AppActions":164,"../stores/AppStore":169,"react":163}],166:[function(require,module,exports){
+},{"../actions/AppActions":164,"../stores/AppStore":170,"./AddNoteForm.js":165,"react":163}],167:[function(require,module,exports){
 module.exports = {
-  
+  ADD_NOTE: 'ADD_NOTE'
 }
-},{}],167:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 var assign = require('object-assign');
 
@@ -19833,7 +19875,7 @@ var AppDispatcher = assign(new Dispatcher(), {
 });
 
 module.exports = AppDispatcher;
-},{"flux":29,"object-assign":32}],168:[function(require,module,exports){
+},{"flux":29,"object-assign":32}],169:[function(require,module,exports){
 var App = require('./components/App');
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -19843,7 +19885,7 @@ ReactDOM.render(
   React.createElement(App, null),
   document.getElementById('app')
 );
-},{"./components/App":165,"./utils/appAPI.js":170,"react":163,"react-dom":34}],169:[function(require,module,exports){
+},{"./components/App":166,"./utils/appAPI.js":171,"react":163,"react-dom":34}],170:[function(require,module,exports){
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
 var EventEmitter = require('events').EventEmitter;
@@ -19852,9 +19894,15 @@ var AppAPI = require('../utils/appAPI.js');
 
 var CHANGE_EVENT = 'change';
 
-var _items = [];
+var _notes = [];
 
 var AppStore = assign({}, EventEmitter.prototype, {
+  addNote: function(note) {
+    _notes.push(note);
+  },
+  getNotes: function() {
+    return _notes;
+  },
   emitChange: function(){
     this.emit(CHANGE_EVENT);
   },
@@ -19870,17 +19918,26 @@ AppDispatcher.register(function(payload){
   var action = payload.action;
 
   switch(action.actionType){
+    case AppConstants.ADD_NOTE:
+      console.log('Adding note...');
 
+      // Store Save
+      AppStore.addNote(action.note);
+
+      // API Save
+
+      //Emit Change
+      AppStore.emit(CHANGE_EVENT);
   }
 
   return true;
 });
 
 module.exports = AppStore;
-},{"../constants/AppConstants":166,"../dispatcher/AppDispatcher":167,"../utils/appAPI.js":170,"events":1,"object-assign":32}],170:[function(require,module,exports){
+},{"../constants/AppConstants":167,"../dispatcher/AppDispatcher":168,"../utils/appAPI.js":171,"events":1,"object-assign":32}],171:[function(require,module,exports){
 var AppActions = require('../actions/AppActions');
 
 module.exports = {
 
 }
-},{"../actions/AppActions":164}]},{},[168]);
+},{"../actions/AppActions":164}]},{},[169]);
