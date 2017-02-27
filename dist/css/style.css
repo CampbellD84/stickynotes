@@ -1,3 +1,18 @@
 body {
   margin-top: 30px;
 }
+
+.note {
+  background: url('../images/note.png');
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 225px;
+  position: relative;
+}
+.note p {
+  position: absolute;
+  top: 100px;
+  left: 30px;
+  font-weight: bold;
+  z-index: 15;
+}
