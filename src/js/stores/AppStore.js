@@ -15,6 +15,9 @@ var AppStore = assign({}, EventEmitter.prototype, {
   getNotes: function() {
     return _notes;
   },
+  setNotes: function(notes) {
+    _notes = notes;
+  },
   emitChange: function(){
     this.emit(CHANGE_EVENT);
   },
@@ -31,13 +34,24 @@ AppDispatcher.register(function(payload){
 
   switch(action.actionType){
     case AppConstants.ADD_NOTE:
-      console.log('Adding note...');
+      console.log('Adding Note...');
 
       // Store Save
       AppStore.addNote(action.note);
 
       // API Save
+      AppAPI.addNote(action.note);
+      //Emit Change
+      AppStore.emit(CHANGE_EVENT);
 
+    case AppConstants.RECEIVE_NOTES:
+      console.log('Receiving Notes...');
+
+      // Store Save
+      AppStore.setNotes(action.notes);
+
+      // API Save
+      AppAPI.addNote(action.note);
       //Emit Change
       AppStore.emit(CHANGE_EVENT);
   }
